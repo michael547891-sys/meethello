@@ -1,4 +1,4 @@
-export const HOLD_AFTER_START_MS = 24 * 60 * 60 * 1000;
+export const HOLD_AFTER_START_MS = 10 * 60 * 1000;
 export const SPOTLIGHT_MS = 4 * 60 * 1000;
 export const QUIET_AROUND_START_MS = 5 * 60 * 1000;
 
