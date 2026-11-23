@@ -2518,11 +2518,10 @@ button:active,
     padding: 0 clamp(12px, 4vw, 16px);
     border-radius: 999px;
   }
-  .way-present {
-    color: #9aa0a6;
-    pointer-events: none;
+  .way-present.is-asking,
+  .way-present.is-asking:hover {
+    color: #0b57d0;
   }
-  .way-present:hover { background: transparent; }
 }
 
 /* Very small phones */

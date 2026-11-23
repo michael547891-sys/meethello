@@ -926,6 +926,7 @@ export default function App() {
   };
   const [joined, setJoined] = useState(false);
   const [asking, setAsking] = useState(false);
+  const [askAction, setAskAction] = useState('');
   const [joinPhase, setJoinPhase] = useState('');
   const [askDot, setAskDot] = useState(0);
   const [phoneFlash, setPhoneFlash] = useState('');
@@ -1240,14 +1241,15 @@ export default function App() {
     }, hold);
   };
   const runJoinAction = (action) => {
-    if (action !== 'join' || joinFlowTimers.current.length) return;
+    if (!action || joinFlowTimers.current.length) return;
     const phase2 = 1000 + Math.random() * 1000;
     let phase3 = 2000 + Math.random() * 2000;
     if (phase2 + phase3 > 5000) phase3 = 5000 - phase2;
     const later = (fn, ms) => {
       joinFlowTimers.current.push(setTimeout(fn, ms));
     };
-    setAsking(true);
+    setAskAction(action);
+    setAsking(action === 'join');
     setJoinPhase('joining');
     later(() => setJoinPhase('hiccup'), phase2);
     const flash = 1800 * 1.3;
@@ -1260,13 +1262,13 @@ export default function App() {
     if (action === 'join' || action === 'companion' || action === 'present') {
       writeJoinCookie();
     }
-    if ((action === 'join' || action === 'companion') && isPhoneJoinBlock()) {
+    if ((action === 'join' || action === 'companion' || action === 'present') && isPhoneJoinBlock()) {
       flashPhoneJoin(action);
       return;
     }
     if (isHandheldDevice()) return;
     if (humanVerified || SKIP_HUMAN_VERIFY) {
-      if (action === 'join') runJoinAction('join');
+      runJoinAction(action);
       return;
     }
     clearTimeout(humanCloseTimer.current);
@@ -1973,12 +1975,13 @@ export default function App() {
                 <div className={`more-ways ${showOther ? 'open' : ''}`} inert={showOther ? undefined : ''}>
                   <div className="more-ways-inner">
                     <div className="more-ways-stack" ref={waysRef}>
-                      <button className={`way${phoneFlash === 'companion' ? ' is-asking' : ''}`} type="button" onClick={() => openHuman('companion')} disabled={phoneFlash === 'companion'}>
-                        {phoneFlash === 'companion' ? <span className="join-spin" aria-hidden="true" /> : <CompanionIcon />}
-                        {phoneFlash === 'companion' ? 'Joining...' : t('companion')}
+                      <button className={`way${phoneFlash === 'companion' || askAction === 'companion' ? ' is-asking' : ''}`} type="button" onClick={() => openHuman('companion')} disabled={phoneFlash === 'companion' || askAction === 'companion'}>
+                        {phoneFlash === 'companion' || askAction === 'companion' ? <span className="join-spin" aria-hidden="true" /> : <CompanionIcon />}
+                        {phoneFlash === 'companion' || askAction === 'companion' ? 'Joining...' : t('companion')}
                       </button>
-                      <button className="way way-present" type="button" onClick={() => openHuman('present')}>
-                        <PresentIcon /> {t('present')}
+                      <button className={`way way-present${phoneFlash === 'present' || askAction === 'present' ? ' is-asking' : ''}`} type="button" onClick={() => openHuman('present')} disabled={phoneFlash === 'present' || askAction === 'present'}>
+                        {phoneFlash === 'present' || askAction === 'present' ? <span className="join-spin" aria-hidden="true" /> : <PresentIcon />}
+                        {phoneFlash === 'present' || askAction === 'present' ? 'Joining...' : t('present')}
                       </button>
                     </div>
                   </div>
