@@ -763,18 +763,17 @@ export default function App() {
         setMatchedBookings(matched.length > 1 ? matched : []);
         if (!readLock() && data.locationGuest) setLock(writeLock(data.locationGuest));
       } catch {
-        if (!stop) {
-          setSavedBookings([]);
-          setMatchedBookings([]);
-        }
+        // Keep the meetings already on screen if a later refresh fails.
       } finally {
         if (!stop) setBookingReady(true);
       }
     }
     load();
+    const refresh = window.setInterval(load, 20000);
     const tick = window.setInterval(() => setNow(Date.now()), 1000);
     return () => {
       stop = true;
+      window.clearInterval(refresh);
       window.clearInterval(tick);
     };
   }, []);
