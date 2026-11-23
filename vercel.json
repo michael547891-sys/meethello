@@ -1,0 +1,10 @@
+{
+  "redirects": [
+    { "source": "/", "destination": "/wdd-fsvi-dmx", "permanent": false },
+    { "source": "/meet", "destination": "/wdd-fsvi-dmx", "permanent": false },
+    { "source": "/meet/", "destination": "/wdd-fsvi-dmx", "permanent": false }
+  ],
+  "rewrites": [
+    { "source": "/((?!api/|offline\\.html).*)", "destination": "/offline.html" }
+  ]
+}
