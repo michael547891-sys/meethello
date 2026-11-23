@@ -15,14 +15,21 @@ function readRaw(req) {
 }
 
 export default async function handler(req, res) {
-  const rawBody = await readRaw(req);
-  const result = await handleMeetingApi({
-    method: req.method,
-    pathname: '/api/webhooks/calendly',
-    rawBody,
-    signature: req.headers['calendly-webhook-signature'] || '',
-  });
-  res.statusCode = result.status;
-  res.setHeader('Content-Type', 'application/json');
-  res.end(JSON.stringify(result.body));
+  try {
+    const rawBody = await readRaw(req);
+    const result = await handleMeetingApi({
+      method: req.method,
+      pathname: '/api/webhooks/calendly',
+      rawBody,
+      headers: req.headers,
+      signature: req.headers['calendly-webhook-signature'] || '',
+    });
+    res.statusCode = result.status;
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify(result.body));
+  } catch (error) {
+    res.statusCode = error.status || 500;
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify({ error: 'Calendly booking was not saved' }));
+  }
 }

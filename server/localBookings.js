@@ -1,15 +1,30 @@
 import { mkdirSync } from 'node:fs';
-import { DatabaseSync } from 'node:sqlite';
+import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { withinRetention } from './placeMatch.js';
 
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const DATA_DIR = path.join(ROOT, 'data');
-mkdirSync(DATA_DIR, { recursive: true });
+let DatabaseSync = null;
+try {
+  ({ DatabaseSync } = await import('node:sqlite'));
+} catch {
+  DatabaseSync = null;
+}
 
-const db = new DatabaseSync(path.join(DATA_DIR, 'bookings.sqlite'));
-db.exec(`
+function dataDirectory() {
+  const preferred = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'data');
+  try {
+    mkdirSync(preferred, { recursive: true });
+    return preferred;
+  } catch {
+    const fallback = path.join(tmpdir(), 'meethello-data');
+    mkdirSync(fallback, { recursive: true });
+    return fallback;
+  }
+}
+
+const db = DatabaseSync ? new DatabaseSync(path.join(dataDirectory(), 'bookings.sqlite')) : null;
+if (db) db.exec(`
   CREATE TABLE IF NOT EXISTS bookings (
     id INTEGER PRIMARY KEY,
     calendly_uri TEXT NOT NULL UNIQUE,
@@ -24,7 +39,7 @@ db.exec(`
   );
 `);
 
-for (const [name, type] of [
+if (db) for (const [name, type] of [
   ['country', 'TEXT NOT NULL DEFAULT \'\''],
   ['city', 'TEXT NOT NULL DEFAULT \'\''],
   ['extra', 'TEXT NOT NULL DEFAULT \'\''],
@@ -72,6 +87,11 @@ function rowToRecord(row) {
 }
 
 export function saveLocalBooking(record) {
+  if (!db) {
+    const error = new Error('Local booking store is unavailable');
+    error.status = 503;
+    throw error;
+  }
   db.prepare(`
     INSERT INTO bookings (
       calendly_uri, name, email, organization, event_name, start_ms, end_ms, canceled, created_at,
@@ -108,10 +128,12 @@ export function saveLocalBooking(record) {
 }
 
 export function cancelLocalBooking(uri) {
+  if (!db) return;
   db.prepare('UPDATE bookings SET canceled = 1 WHERE calendly_uri = ?').run(uri);
 }
 
 export function markLocalBooking(uri, change) {
+  if (!db) return;
   if (change.verified) {
     db.prepare('UPDATE bookings SET verified = 1, verified_ip = ? WHERE calendly_uri = ?').run(change.verifiedIp || '', uri);
   }
@@ -121,6 +143,7 @@ export function markLocalBooking(uri, change) {
 }
 
 export function localRecords(now = Date.now()) {
+  if (!db) return [];
   const cutoff = new Date(now - 7 * 24 * 60 * 60 * 1000).toISOString();
   db.prepare('DELETE FROM bookings WHERE created_at < ?').run(cutoff);
   return db.prepare(`

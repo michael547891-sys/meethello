@@ -32,7 +32,13 @@ async function loadRecords() {
     if (dirty || records.length !== raw.length) await writeReservations(records);
     return records;
   }
-  const local = await import('./localBookings.js');
+  let local;
+  try {
+    local = await import('./localBookings.js');
+  } catch {
+    return [];
+  }
+  if (!local.localRecords) return [];
   const records = local.localRecords();
   const dirty = await rememberPlaces(records);
   if (dirty) records.forEach((record) => local.saveLocalBooking(record));
