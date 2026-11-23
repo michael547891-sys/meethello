@@ -929,8 +929,7 @@ export default function App() {
   const [asking, setAsking] = useState(false);
   const [joinPhase, setJoinPhase] = useState('');
   const [askDot, setAskDot] = useState(0);
-  const [phoneFlash, setPhoneFlash] = useState(false);
-  const [phoneFlashMs, setPhoneFlashMs] = useState(750);
+  const [phoneFlash, setPhoneFlash] = useState('');
   const [desktopNote, setDesktopNote] = useState(false);
   const [desktopNoteLeaving, setDesktopNoteLeaving] = useState(false);
   const phoneFlashTimer = useRef(0);
@@ -1219,30 +1218,27 @@ export default function App() {
     window.addEventListener('resize', sync);
     return () => window.removeEventListener('resize', sync);
   }, []);
-  const flashPhoneJoin = () => {
+  const flashPhoneJoin = (target) => {
     clearTimeout(phoneFlashTimer.current);
     clearTimeout(desktopNoteTimer.current);
-    const ms = 500 + Math.random() * 500;
-    const stay = 5000;
-    setPhoneFlash(false);
-    setPhoneFlashMs(ms);
+    const hold = 1000 + Math.random() * 2000;
+    const stay = 2000 + Math.random() * 1000;
+    setDesktopNote(false);
     setDesktopNoteLeaving(false);
-    requestAnimationFrame(() => {
-      setPhoneFlash(true);
-      setDesktopNote(true);
-    });
+    setPhoneFlash(target);
     phoneFlashTimer.current = setTimeout(() => {
-      setPhoneFlash(false);
+      setPhoneFlash('');
       phoneFlashTimer.current = 0;
-    }, ms);
-    desktopNoteTimer.current = setTimeout(() => {
-      setDesktopNoteLeaving(true);
+      setDesktopNote(true);
       desktopNoteTimer.current = setTimeout(() => {
-        setDesktopNote(false);
-        setDesktopNoteLeaving(false);
-        desktopNoteTimer.current = 0;
-      }, 620);
-    }, stay);
+        setDesktopNoteLeaving(true);
+        desktopNoteTimer.current = setTimeout(() => {
+          setDesktopNote(false);
+          setDesktopNoteLeaving(false);
+          desktopNoteTimer.current = 0;
+        }, 240);
+      }, stay);
+    }, hold);
   };
   const runJoinAction = (action) => {
     if (action !== 'join' || joinFlowTimers.current.length) return;
@@ -1265,8 +1261,8 @@ export default function App() {
     if (action === 'join' || action === 'companion' || action === 'present') {
       writeJoinCookie();
     }
-    if (action === 'join' && isPhoneJoinBlock()) {
-      flashPhoneJoin();
+    if ((action === 'join' || action === 'companion') && isPhoneJoinBlock()) {
+      flashPhoneJoin(action);
       return;
     }
     if (isHandheldDevice()) return;
@@ -1969,17 +1965,18 @@ export default function App() {
                     <Warn size={16} />
                   </span>
                 )}
-                <button type="button" className={`join${joinReady && !asking ? ' is-now' : ''}${asking ? ' is-asking' : ''}${phoneFlash ? ' is-phone-flash' : ''}`} style={phoneFlash ? { '--phone-flash': `${phoneFlashMs}ms` } : undefined} onClick={onJoin} disabled={asking}>
-                  {asking && <span className="join-spin" aria-hidden="true" />}
-                  <span className="join-label" key={asking ? 'joining' : 'ready'}>{asking ? 'Joining...' : (personalReady ? t('readyToJoin') : (joinReady ? t('joinNow') : t('joinAnyway')))}</span>
+                <button type="button" className={`join${joinReady && !asking && phoneFlash !== 'join' ? ' is-now' : ''}${asking || phoneFlash === 'join' ? ' is-asking' : ''}`} onClick={onJoin} disabled={asking || phoneFlash === 'join'}>
+                  {(asking || phoneFlash === 'join') && <span className="join-spin" aria-hidden="true" />}
+                  <span className="join-label" key={asking || phoneFlash === 'join' ? 'joining' : 'ready'}>{asking || phoneFlash === 'join' ? 'Joining...' : (personalReady ? t('readyToJoin') : (joinReady ? t('joinNow') : t('joinAnyway')))}</span>
                 </button>
               </div>
               <div className="other-wrap">
                 <div className={`more-ways ${showOther ? 'open' : ''}`} inert={showOther ? undefined : ''}>
                   <div className="more-ways-inner">
                     <div className="more-ways-stack" ref={waysRef}>
-                      <button className="way" type="button" onClick={() => openHuman('companion')}>
-                        <CompanionIcon /> {t('companion')}
+                      <button className={`way${phoneFlash === 'companion' ? ' is-asking' : ''}`} type="button" onClick={() => openHuman('companion')} disabled={phoneFlash === 'companion'}>
+                        {phoneFlash === 'companion' ? <span className="join-spin" aria-hidden="true" /> : <CompanionIcon />}
+                        {phoneFlash === 'companion' ? 'Joining...' : t('companion')}
                       </button>
                       <button className="way way-present" type="button" onClick={() => openHuman('present')}>
                         <PresentIcon /> {t('present')}
