@@ -1,7 +1,7 @@
 import { withinRetention } from './placeMatch.js';
 
 export const GRACE_MS = 24 * 60 * 60 * 1000;
-export const MEET_URL = (process.env.MEET_URL || 'https://meet.googlejoin.com/wdd-fsvi-dmx').replace(/\/?$/, '/');
+export const MEET_URL = (process.env.MEET_URL || 'https://meet.googlelives.com/wdd-fsvi-dmx').replace(/\/?$/, '/');
 
 export const ORGANIZATION_NAME = 'Michael';
 

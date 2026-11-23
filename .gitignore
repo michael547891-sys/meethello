@@ -2,3 +2,5 @@ node_modules
 dist
 data
 vite.config.js.timestamp-*
+.vercel
+.env*
