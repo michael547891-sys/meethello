@@ -1809,7 +1809,15 @@ export default function App() {
         {upcoming && (
         <div className="account-row">
           <div className="account">
-            <div className="email" title={email}>{email}</div>
+            <div className="email" title={email}>
+              <span className="email-icon" aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="5" width="18" height="14" rx="2" />
+                  <path d="M3 7l9 7 9-7" />
+                </svg>
+              </span>
+              <span className="email-text">{email}</span>
+            </div>
             <a className="switch" href="#">{t('switchAccount')}</a>
           </div>
           <span className="avatar" aria-hidden="true">{nameLetter}</span>
