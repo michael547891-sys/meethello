@@ -29,14 +29,13 @@ button:active,
   display: flex; flex-direction: column; justify-content: center; align-items: flex-end;
   height: 32px; text-align: right; font-size: 14px; line-height: 15px; max-width: 220px; min-width: 0;
 }
-.email { display: flex; align-items: center; justify-content: flex-end; gap: 6px; min-width: 0; max-width: 100%; line-height: 15px; }
-.email-icon { flex: none; display: inline-flex; color: #444746; }
-.email-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.email { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 15px; max-width: 100%; }
 .switch { font-size: 13px; line-height: 15px; color: #1f1f1f; text-decoration: none; }
 .switch:hover { text-decoration: underline; }
 .avatar {
-  width: 22.4px; height: 22.4px; flex: none; border-radius: 50%;
-  visibility: hidden;
+  width: 32px; height: 32px; flex: none; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: #1a73e8; color: #fff; font-size: 14px; font-weight: 500; line-height: 1;
 }
 .upgrade { position: relative; display: inline-flex; align-items: center; justify-content: center;
   height: 40px; padding: 0 24px; border-radius: 20px; background: #d3e3fd; color: #0b57d0;
@@ -2354,7 +2353,7 @@ button:active,
     font-size: clamp(11px, 3vw, 12px);
     line-height: 1.35;
   }
-  .avatar { display: none; }
+  .avatar { width: 28px; height: 28px; font-size: 13px; }
 
   .main {
     --side-pad: clamp(16px, 18vw, 80px);
